@@ -17,7 +17,7 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error
 from xgboost import XGBRegressor
 
 # =====================================================================
-# BUENAVENTURA · SALES INTELLIGENCE | Versión final
+# BUENAVENTURA · INTELIGENCIA DE VENTAS | Versión final
 # Lee la base histórica en modo de solo lectura. No escribe en data/ ni outputs/.
 # =====================================================================
 st.set_page_config(
@@ -37,6 +37,7 @@ OFFICIAL_LOGO_URL = "https://buenaventura.com/wp-content/uploads/2024/06/Logo-1.
 OFFICIAL_INVESTOR_URL = "https://buenaventura.com/inversionista/"
 FY2025_RESULTS_URL = "https://buenaventura.com/wp-content/uploads/2025/02/4Q25-BVN-Earnings-Press-Release-Vf.pdf"
 Q1_2026_RESULTS_URL = "https://buenaventura.com/wp-content/uploads/2026/04/1Q26-BVN-Earnings-Press-Release.pdf"
+Q2_2026_RESULTS_URL = "https://www.sec.gov/Archives/edgar/data/1013131/000110465926088868/tm2621768d1_6k.htm"
 Q2_2026_FINANCIALS_URL = "https://buenaventura.com/wp-content/uploads/2026/04/2Q-Buenaventura-Consolidated-2026.pdf"
 
 TARGET = "total_revenues_usd_millones"
@@ -172,6 +173,29 @@ st.markdown(
     .bvn-step-title {{ color:#203E2D; font-weight:800; font-size:.84rem; margin-bottom:.12rem; }}
     .bvn-step-text {{ color:#54675D; font-size:.78rem; line-height:1.4; }}
     .bvn-footer {{ border-top:1px solid #DDE6DE; margin-top:1.2rem; padding-top:.8rem; color:#62736A; font-size:.75rem; line-height:1.5; }}
+    /* Visualizacion refinada de historia, pronostico y escenarios */
+    .bvn-chart-note {{ color:#718477; font-size:.84rem; line-height:1.45; margin:.05rem 0 .3rem 0; }}
+    .bvn-outlook-head {{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; margin:.15rem 0 .75rem 0; padding:.65rem .75rem; border:1px solid #E0EAE1; border-radius:12px; background:linear-gradient(110deg,#F6FAF5,#FFFFFF); }}
+    .bvn-outlook-head-label {{ color:#718477; font-size:.65rem; font-weight:850; letter-spacing:.11em; text-transform:uppercase; }}
+    .bvn-outlook-head-value {{ color:#1C5B3D; font-size:.84rem; font-weight:850; white-space:nowrap; }}
+    .bvn-outlook-card {{ position:relative; overflow:hidden; border:1px solid #DFE8E0; border-radius:15px; padding:1rem 1rem .95rem 1rem; margin:.62rem 0; background:#FFFFFF; box-shadow:0 5px 16px rgba(22,50,35,.045); }}
+    .bvn-outlook-card:before {{ content:""; position:absolute; inset:0 auto 0 0; width:4px; background:#A8C99B; }}
+    .bvn-outlook-card-primary:before {{ background:#2C8052; }}
+    .bvn-outlook-card-final:before {{ background:#7DB844; }}
+    .bvn-outlook-card-scenario:before {{ background:#A2B6AB; }}
+    .bvn-outlook-label {{ display:flex; align-items:center; justify-content:space-between; gap:.55rem; color:#63786B; font-size:.78rem; line-height:1.3; font-weight:700; }}
+    .bvn-outlook-period {{ display:inline-block; margin-top:.35rem; padding:.18rem .45rem; border-radius:6px; background:#F0F6EF; color:#287047; font-size:.72rem; font-weight:850; letter-spacing:.025em; }}
+    .bvn-outlook-value {{ color:#173D2C; font-size:clamp(1.28rem,1.62vw,1.78rem); font-weight:900; letter-spacing:-.035em; line-height:1.22; margin:.35rem 0 .4rem 0; white-space:nowrap; overflow-wrap:normal; }}
+    .bvn-outlook-value small {{ color:#607568; font-size:.78rem; font-weight:750; letter-spacing:0; }}
+    .bvn-outlook-foot {{ display:flex; align-items:center; flex-wrap:wrap; gap:.4rem; color:#697D70; font-size:.75rem; line-height:1.4; }}
+    .bvn-outlook-pill {{ display:inline-flex; align-items:center; gap:.22rem; border-radius:999px; padding:.2rem .48rem; font-size:.73rem; line-height:1.25; font-weight:800; white-space:nowrap; }}
+    .bvn-pill-positive {{ color:#21653F; background:#DFF5E6; }}
+    .bvn-pill-negative {{ color:#9A3D35; background:#FCE9E5; }}
+    .bvn-pill-neutral {{ color:#436052; background:#EDF2EE; }}
+    .bvn-outlook-meta {{ display:flex; align-items:flex-start; gap:.55rem; padding:.48rem .1rem; color:#738579; font-size:.77rem; line-height:1.4; }}
+    .bvn-outlook-meta strong {{ display:block; color:#355544; font-weight:800; margin-bottom:.08rem; }}
+    .bvn-outlook-meta-icon {{ flex:0 0 1.65rem; width:1.65rem; height:1.65rem; display:flex; align-items:center; justify-content:center; color:#27734A; background:#E7F1E7; border-radius:8px; font-size:.85rem; }}
+    @media(max-width:1100px) {{ .bvn-outlook-value {{ font-size:1.45rem; }} .bvn-outlook-card {{ padding:.85rem; }} }}
     @media(max-width:1100px) {{ .bvn-hero {{ background-image:linear-gradient(90deg,rgba(247,250,247,.98),rgba(247,250,247,.83)),url('{HERO_IMAGE_URI}'); }} }}
     @media(max-width:850px) {{
       .bvn-hero {{ min-height:auto; padding:1.05rem; background-image:linear-gradient(90deg,rgba(247,250,247,.98),rgba(247,250,247,.9)),url('{HERO_IMAGE_URI}'); }}
@@ -764,7 +788,7 @@ with st.sidebar:
         f"""
         <div class="bvn-side-brand">
           <img src="{OFFICIAL_LOGO_URL}" alt="Compañía de Minas Buenaventura" loading="eager">
-          <div class="bvn-side-wordmark">SALES INTELLIGENCE</div>
+          <div class="bvn-side-wordmark">INTELIGENCIA DE VENTAS</div>
           <div class="bvn-side-tagline">Pronóstico de ingresos</div>
         </div>
         <nav class="bvn-nav" aria-label="Navegación del dashboard">
@@ -776,7 +800,7 @@ with st.sidebar:
         </nav>
         <div class="bvn-side-bottom">
           <div class="motto">Minería<br>que genera<br>un mundo mejor</div>
-          <div class="side-note"><b>Modelo analítico</b><br>XGBoost + variables de precios de metales<br><br><b>Prototipo interno · Versión 1.0</b><br>No es una proyección oficial de la compañía.</div>
+          <div class="side-note"><b>Modelo analítico</b><br>XGBoost + variables de precios de metales<br><br><b>Prototipo analítico · Revisión 1.1</b><br>No es una proyección oficial de la compañía.<br><br><span style="font-size:.65rem;opacity:.8">Build: 2026-10-20 · escenario sincronizado</span></div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -839,7 +863,7 @@ st.markdown(
     f"""
     <section class="bvn-hero">
       <div class="bvn-hero-copy">
-        <div class="bvn-kicker">BVN · SALES INTELLIGENCE</div>
+        <div class="bvn-kicker">BVN · INTELIGENCIA DE VENTAS</div>
         <h1>Pronóstico de ingresos trimestrales</h1>
         <p>Modelo experimental con XGBoost para estimar los ingresos de Buenaventura usando la historia trimestral y el comportamiento de los precios de metales.</p>
         <div class="bvn-chiprow">
@@ -860,16 +884,21 @@ with st.container(border=True):
     with cfg1:
         horizon = st.selectbox("Trimestres a proyectar", options=list(range(1, 9)), index=3, key="horizon_control")
     with cfg2:
-        scenario_pct = st.slider(
+        scenario_pct_widget = st.slider(
             f"Cambio trimestral supuesto de {selected_model_name.lower()}",
             min_value=-10.0, max_value=10.0, value=0.0, step=1.0, format="%.0f%%",
-            help="Solo se aplica a trimestres sin un precio completo observado. 0% mantiene el último índice completo conocido.",
+            help="Solo se aplica a trimestres sin un dato externo completo observado. 0% mantiene el último valor completo conocido.",
             key="scenario_pct_control",
         )
+        # Fuente única para cálculo y presentación; evita depender de valores duplicados.
+        scenario_pct_active = float(st.session_state["scenario_pct_control"])
+        scenario_pct_label = f"{scenario_pct_active:+.0f}%"
+        st.caption(f"Escenario activo en esta sesión: {scenario_pct_label} por trimestre.")
     with cfg3:
-        if st.button("↻ Actualizar escenario", type="primary", use_container_width=True, key="refresh_prices_main"):
-            st.cache_data.clear()
+        if st.button("↻ Actualizar precios externos", type="primary", width="stretch", key="refresh_prices_main"):
+            load_metal_index_quarterly.clear()
             st.rerun()
+    st.caption("El escenario se recalcula al mover los controles. Este botón fuerza la actualización de los precios externos del Banco Mundial.")
     st.caption("El supuesto editable no es una predicción oficial del precio de los metales. Los datos de ingresos se leen sin modificarse.")
 
 # Entrenar el modelo elegido y preparar proyecciones.
@@ -879,7 +908,7 @@ try:
         market=market,
         features_df=features_df,
         horizon=int(horizon),
-        scenario_pct=float(scenario_pct),
+        scenario_pct=float(scenario_pct_active),
         feature_cols=selected_feature_cols,
         selected_external_name=selected_model_name,
     )
@@ -887,10 +916,53 @@ except Exception as exc:
     st.error(f"No se pudo calcular la proyección: {exc}")
     st.stop()
 
+# Contrafactual explícito: escenario elegido frente al mismo modelo con 0%.
+# No se inventa una elasticidad; se mide la diferencia real que devuelve XGBoost.
+scenario_diagnostic_error = None
+try:
+    if abs(float(scenario_pct_active)) > 1e-9:
+        forecast_reference, _ = project_sales(
+            sales=sales,
+            market=market,
+            features_df=features_df,
+            horizon=int(horizon),
+            scenario_pct=0.0,
+            feature_cols=selected_feature_cols,
+            selected_external_name=selected_model_name,
+        )
+    else:
+        forecast_reference = forecast.copy()
+    scenario_income_effect = (
+        forecast["pronostico_xgboost_usd_millones"].to_numpy(dtype=float)
+        - forecast_reference["pronostico_xgboost_usd_millones"].to_numpy(dtype=float)
+    )
+except Exception as exc:
+    forecast_reference = None
+    scenario_income_effect = np.full(len(forecast), np.nan, dtype=float)
+    scenario_diagnostic_error = f"{type(exc).__name__}: {exc}"
+
+# La comparación se conserva también en la tabla exportable para comprobar el efecto por trimestre.
+forecast["efecto_vs_escenario_0_usd_millones"] = scenario_income_effect
+
+if int(horizon) > 4:
+    st.warning(
+        "El pronóstico supera los cuatro trimestres usados en la evaluación recursiva. "
+        "Los trimestres 5 a 8 son extrapolaciones adicionales y no cuentan con la misma validación específica."
+    )
+
 first_row = forecast.iloc[0]
 last_row = forecast.iloc[-1]
 first_value = float(first_row["pronostico_xgboost_usd_millones"])
 last_value = float(last_row["pronostico_xgboost_usd_millones"])
+
+def format_usd_millions(value: float) -> str:
+    """Formato espanol compacto: US$ 545,7 millones."""
+    number = f"{value:,.1f}"
+    number = number.replace(",", "TMPSEP").replace(".", ",").replace("TMPSEP", ".")
+    return f"US$ {number} millones"
+
+first_value_display = format_usd_millions(first_value)
+last_value_display = format_usd_millions(last_value)
 first_change_pct = ((first_value / last_sales) - 1.0) * 100.0
 selected_recursive_rmse = float(selected_multi_row["RMSE (US$ M)"])
 selected_recursive_mae = float(selected_multi_row["MAE (US$ M)"])
@@ -909,11 +981,11 @@ st.caption(f"Último ingreso real disponible: {last_sales_quarter}. Los precios 
 
 # Gráfica principal y escenario futuro en dos columnas, igual que el concepto visual.
 st.markdown('<div id="forecast-section"></div>', unsafe_allow_html=True)
-chart_col, outlook_col = st.columns([2.25, .95], gap="medium")
+chart_col, outlook_col = st.columns([2.0, 1.05], gap="medium")
 with chart_col:
     with st.container(border=True):
         st.markdown('<div class="bvn-panel-title"><span class="bvn-mini-icon">▥</span>Histórico y pronóstico de ingresos trimestrales</div>', unsafe_allow_html=True)
-        st.caption("Ingresos consolidados (US$ millones). La línea punteada marca el inicio del pronóstico.")
+        st.markdown('<div class="bvn-chart-note">Ingresos consolidados en US$ millones · La línea punteada separa los datos observados del pronóstico.</div>', unsafe_allow_html=True)
         history_view = sales[["trimestre", TARGET]].copy().rename(columns={TARGET: "Ingresos"})
         forecast_view = forecast[["trimestre", "pronostico_xgboost_usd_millones"]].copy().rename(columns={"pronostico_xgboost_usd_millones": "Ingresos"})
         hist_x = history_view["trimestre"].tolist()
@@ -926,6 +998,12 @@ with chart_col:
         tick_values += future_x
 
         fig = go.Figure()
+        # Resaltar suavemente la zona de proyección sin ocultar la trayectoria de los datos.
+        if future_x:
+            fig.add_vrect(
+                x0=last_sales_quarter, x1=future_x[-1],
+                fillcolor="rgba(125,184,68,0.055)", line_width=0, layer="below",
+            )
         # Rango ilustrativo, basado en RMSE recursivo; no es un intervalo estadístico formal.
         upper = [max(0.0, float(v) + selected_recursive_rmse) for v in forecast_view["Ingresos"]]
         lower = [max(0.0, float(v) - selected_recursive_rmse) for v in forecast_view["Ingresos"]]
@@ -952,29 +1030,86 @@ with chart_col:
             marker=dict(size=8, symbol="diamond", color="#78B83F", line=dict(color="#FFFFFF", width=1)),
             hovertemplate="%{x}<br>US$ %{y:,.1f} millones<extra>Pronóstico</extra>",
         ))
-        fig.add_vline(x=last_sales_quarter, line_width=1.3, line_dash="dot", line_color="#5F7669")
+        fig.add_vline(x=last_sales_quarter, line_width=1.4, line_dash="dot", line_color="#627F6D")
+        fig.add_annotation(
+            x=last_sales_quarter, y=1.02, xref="x", yref="paper",
+            text="INICIO DEL PRONÓSTICO", showarrow=False, xanchor="right", yanchor="bottom",
+            font=dict(color="#477957", size=9), bgcolor="rgba(251,253,251,.92)",
+            bordercolor="#DDE8DC", borderwidth=1, borderpad=4,
+        )
         fig.update_layout(
-            height=365, template="plotly_white", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#FFFFFF",
-            margin=dict(l=48, r=14, t=46, b=82),
-            legend=dict(orientation="h", y=1.16, x=0, xanchor="left", yanchor="bottom", font=dict(color="#193D2D", size=11), bgcolor="rgba(255,255,255,.92)"),
+            height=390, template="plotly_white", paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="#FBFDFB",
+            margin=dict(l=48, r=14, t=58, b=82),
+            legend=dict(orientation="h", y=1.14, x=0, xanchor="left", yanchor="bottom", font=dict(color="#193D2D", size=11), bgcolor="rgba(255,255,255,.96)", bordercolor="#E1EAE2", borderwidth=1),
             font=dict(family="Arial, sans-serif", color="#2C4035", size=12), hovermode="x unified",
-            xaxis=dict(title=dict(text="Trimestre", font=dict(color="#163D2C", size=13)), tickfont=dict(color="#344A3D", size=10), tickmode="array", tickvals=tick_values, tickangle=-38, showgrid=False, automargin=True, showline=True, linecolor="#9BAFA1", title_standoff=14),
-            yaxis=dict(title=dict(text="Ingresos totales (US$ millones)", font=dict(color="#163D2C", size=13)), tickfont=dict(color="#344A3D", size=11), gridcolor="#E2EAE2", zeroline=False, tickformat=",.0f", automargin=True, title_standoff=12),
+            hoverlabel=dict(bgcolor="#12372C", bordercolor="#12372C", font=dict(color="#FFFFFF", size=12)),
+            # Fija explícitamente el orden temporal: los trazos de la banda de pronóstico
+            # se añaden antes que la historia y, sin categoryarray, Plotly puede ordenar
+            # las categorías por su primera aparición (dibujando el futuro a la izquierda).
+            xaxis=dict(title=dict(text="Trimestre", font=dict(color="#163D2C", size=13)), tickfont=dict(color="#344A3D", size=10), tickmode="array", tickvals=tick_values, tickangle=-38, categoryorder="array", categoryarray=combined_labels, showgrid=False, automargin=True, showline=True, linecolor="#9BAFA1", title_standoff=14),
+            yaxis=dict(title=dict(text="Ingresos totales (US$ millones)", font=dict(color="#163D2C", size=13)), tickfont=dict(color="#52695D", size=11), gridcolor="#E4ECE5", zeroline=False, tickformat=",.0f", rangemode="tozero", automargin=True, title_standoff=12, showline=False),
         )
         fig.update_xaxes(title=dict(text="Trimestre", font=dict(color="#163D2C", size=13)), tickfont=dict(color="#344A3D", size=10))
         fig.update_yaxes(title=dict(text="Ingresos totales (US$ millones)", font=dict(color="#163D2C", size=13)), tickfont=dict(color="#344A3D", size=11))
-        st.plotly_chart(fig, use_container_width=True, theme=None, config={"displaylogo": False, "responsive": True})
-        st.caption("La banda verde es ilustrativa (±RMSE de validación recursiva); no es un intervalo de confianza estadístico.")
+        st.plotly_chart(fig, width="stretch", theme=None, config={"displaylogo": False, "responsive": True})
+        st.markdown('<div class="bvn-chart-note">La banda verde representa ±RMSE de validación recursiva; es orientativa, no un intervalo de confianza estadístico.</div>', unsafe_allow_html=True)
 
 with outlook_col:
     with st.container(border=True):
         st.markdown('<div class="bvn-panel-title"><span class="bvn-mini-icon">◎</span>Escenario de ingresos futuros</div>', unsafe_allow_html=True)
-        st.metric(f"Primera proyección · {first_row['trimestre']}", f"US$ {first_value:,.1f} M", f"{first_change_pct:+.1f}% vs. último ingreso")
-        st.markdown('<div class="bvn-divider"></div>', unsafe_allow_html=True)
-        st.metric(f"Último horizonte · {last_row['trimestre']}", f"US$ {last_value:,.1f} M", f"{(last_value / last_sales - 1) * 100:+.1f}% vs. último ingreso")
-        st.markdown('<div class="bvn-divider"></div>', unsafe_allow_html=True)
-        st.metric("Supuesto de variable externa", f"{scenario_pct:+.0f}% por trimestre", "solo si falta un precio completo")
-        st.caption(f"Variable externa seleccionada para el pronóstico: **{selected_model_name}**.")
+        st.markdown(
+            f'<div class="bvn-outlook-head"><span class="bvn-outlook-head-label">Horizonte proyectado</span><span class="bvn-outlook-head-value">{len(forecast)} trimestres</span></div>',
+            unsafe_allow_html=True,
+        )
+        first_pill_class = "bvn-pill-positive" if first_change_pct >= 0 else "bvn-pill-negative"
+        first_pill_icon = "↑" if first_change_pct >= 0 else "↓"
+        last_change_pct = (last_value / last_sales - 1) * 100
+        last_pill_class = "bvn-pill-positive" if last_change_pct >= 0 else "bvn-pill-negative"
+        last_pill_icon = "↑" if last_change_pct >= 0 else "↓"
+        st.markdown(
+            f"""
+            <div class="bvn-outlook-card bvn-outlook-card-primary">
+              <div class="bvn-outlook-label"><span>Primera proyección</span><span class="bvn-outlook-period">{first_row['trimestre']}</span></div>
+              <div class="bvn-outlook-value">{first_value_display}</div>
+              <div class="bvn-outlook-foot"><span class="bvn-outlook-pill {first_pill_class}">{first_pill_icon} {first_change_pct:+.1f}%</span><span>frente al último ingreso real</span></div>
+            </div>
+            <div class="bvn-outlook-card bvn-outlook-card-final">
+              <div class="bvn-outlook-label"><span>Último trimestre proyectado</span><span class="bvn-outlook-period">{last_row['trimestre']}</span></div>
+              <div class="bvn-outlook-value">{last_value_display}</div>
+              <div class="bvn-outlook-foot"><span class="bvn-outlook-pill {last_pill_class}">{last_pill_icon} {last_change_pct:+.1f}%</span><span>frente al último ingreso real</span></div>
+            </div>
+            <div class="bvn-outlook-card bvn-outlook-card-scenario">
+              <div class="bvn-outlook-label"><span>Supuesto de variable externa</span><span class="bvn-outlook-period">Escenario editable</span></div>
+              <div class="bvn-outlook-value">{scenario_pct_label} <small>por trimestre</small></div>
+              <div class="bvn-outlook-foot"><span class="bvn-outlook-pill bvn-pill-neutral">Solo para precios faltantes</span></div>
+            </div>
+            <div class="bvn-outlook-meta"><span class="bvn-outlook-meta-icon">⌁</span><span><strong>Periodo cubierto</strong>{first_row['trimestre']} – {last_row['trimestre']}</span></div>
+            <div class="bvn-outlook-meta"><span class="bvn-outlook-meta-icon">◈</span><span><strong>Variable externa</strong>{selected_model_name}</span></div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if scenario_diagnostic_error is not None and abs(float(scenario_pct_active)) > 1e-9:
+            st.warning("No se pudo comparar este escenario contra el caso de 0%. Revisa el mensaje técnico y no interpretes el efecto como cero.")
+            st.caption(f"Detalle de diagnóstico: {scenario_diagnostic_error}")
+        elif abs(float(scenario_pct_active)) > 1e-9 and forecast_reference is not None:
+            if np.allclose(scenario_income_effect, 0.0, rtol=0.0, atol=0.01):
+                st.warning(
+                    "El escenario sí modifica los precios simulados del oro, pero XGBoost devuelve "
+                    "los mismos ingresos que en el escenario de 0% para estos valores. El control "
+                    "está conectado; el modelo no está mostrando sensibilidad local en este rango. "
+                    "No interpretes esto como prueba de que el oro no afecta al negocio."
+                )
+            else:
+                last_effect = float(scenario_income_effect[-1])
+                st.info(
+                    f"Efecto estimado frente al escenario 0% en {last_row['trimestre']}: "
+                    f"US$ {last_effect:+,.2f} millones."
+                )
+        else:
+            st.caption(
+                "Efecto contra el escenario base de 0% disponible en la tabla detallada. "
+                "Si es cero, el modelo no ha respondido a este cambio de precio en ese horizonte."
+            )
 
 # Tabla detallada e interpretación lado a lado.
 st.markdown('<div class="section-kicker">Pronóstico detallado</div>', unsafe_allow_html=True)
@@ -990,14 +1125,15 @@ with table_col:
             "Ingreso previo (US$ M)": forecast["ventas_lag_1_usd_millones"].map(lambda v: f"{v:,.2f}"),
             "Mismo trim. año previo": forecast["ventas_lag_4_usd_millones"].map(lambda v: f"{v:,.2f}"),
             external_title: forecast["valor_variable_externa_lag_1"].map(lambda v: f"{v:,.2f}"),
+            "Efecto vs 0% (US$ M)": forecast["efecto_vs_escenario_0_usd_millones"].map(lambda v: f"{v:+,.2f}" if pd.notna(v) else "No calculado"),
             "Periodo y origen del dato": forecast.apply(lambda row: f"{row['periodo_variable_externa']} · {row['origen_variable_externa']}", axis=1),
         })
-        st.dataframe(table, use_container_width=True, hide_index=True, height=min(310, 48 + 36 * len(table)))
+        st.dataframe(table, width="stretch", hide_index=True, height=min(310, 48 + 36 * len(table)))
         st.download_button(
             "⬇ Descargar pronóstico en CSV",
             data=forecast.to_csv(index=False).encode("utf-8-sig"),
             file_name="pronostico_ventas_buenaventura_xgboost.csv",
-            mime="text/csv", type="primary", use_container_width=False,
+            mime="text/csv", type="primary", width="content",
         )
 with explain_col:
     with st.container(border=True):
@@ -1021,18 +1157,24 @@ with explain_col:
 
 # La validación completa permanece disponible sin saturar el resumen ejecutivo.
 st.markdown('<div id="validation-section"></div>', unsafe_allow_html=True)
-with st.expander("Ver precisión histórica y comparación de modelos"):
+with st.expander("Ver precisión histórica y comparación de modelos", expanded=True):
     st.markdown("### Evaluación a un trimestre")
     st.markdown("Todos los métodos se comparan en las mismas fechas. El MAE mide el error absoluto medio en US$ millones; menor es mejor.")
     one_display = one_metrics.copy()
     one_display["MAE (US$ M)"] = one_display["MAE (US$ M)"].map(lambda value: f"{value:,.1f}")
     one_display["RMSE (US$ M)"] = one_display["RMSE (US$ M)"].map(lambda value: f"{value:,.1f}")
-    st.dataframe(one_display, use_container_width=True, hide_index=True)
+    st.dataframe(one_display, width="stretch", hide_index=True)
     one_delta = ((float(selected_one_row["MAE (US$ M)"]) / float(baseline_one["MAE (US$ M)"])) - 1.0) * 100.0
     if one_delta <= 0:
         st.success(f"A un trimestre, el modelo seleccionado igualó o superó a la mejor referencia (diferencia de MAE {one_delta:+.1f}%).")
     else:
-        st.warning(f"A un trimestre, el modelo seleccionado tuvo {one_delta:.1f}% más MAE que la mejor referencia sencilla. La variante se eligió para el horizonte recursivo de cuatro trimestres, no para todo horizonte.")
+        st.warning(
+            f"Limitación relevante: a un trimestre, la variante XGBoost seleccionada para el horizonte de cuatro trimestres "
+            f"tuvo {one_delta:.1f}% más MAE que la mejor referencia sencilla "
+            f"({selected_one_row['MAE (US$ M)']:.1f} frente a {baseline_one['MAE (US$ M)']:.1f} US$ millones). "
+            "Para decisiones a un solo trimestre, la referencia sencilla fue más precisa. "
+            "La selección de XGBoost responde al horizonte recursivo de cuatro trimestres, no a todos los horizontes."
+        )
     with st.expander("Ver predicciones históricas individuales"):
         one_detail = one.rename(columns={
             "trimestre": "Trimestre", "ventas_reales": "Ingresos reales (US$ M)",
@@ -1040,13 +1182,13 @@ with st.expander("Ver precisión histórica y comparación de modelos"):
             "xgboost_sin_externa": "XGBoost sin variable externa (US$ M)",
             "ultimo_trimestre": "Último trimestre (US$ M)", "estacional_lag_4": "Mismo trimestre año anterior (US$ M)",
         })
-        st.dataframe(one_detail, use_container_width=True, hide_index=True)
+        st.dataframe(one_detail, width="stretch", hide_index=True)
 
     st.markdown("### Evaluación recursiva a cuatro trimestres")
     multi_display = multi_metrics.copy()
     multi_display["MAE (US$ M)"] = multi_display["MAE (US$ M)"].map(lambda value: f"{value:,.1f}")
     multi_display["RMSE (US$ M)"] = multi_display["RMSE (US$ M)"].map(lambda value: f"{value:,.1f}")
-    st.dataframe(multi_display, use_container_width=True, hide_index=True)
+    st.dataframe(multi_display, width="stretch", hide_index=True)
     best_xgb_label = str(multi_metrics[multi_metrics["Modelo"].str.startswith("XGBoost")].sort_values("MAE (US$ M)").iloc[0]["Modelo"])
     if selected_recursive_mae <= float(baseline_multi["MAE (US$ M)"]):
         st.success(f"La variante externa seleccionada ({selected_model_name}) logró un MAE menor o igual que la mejor referencia sencilla en la validación a cuatro trimestres.")
@@ -1061,7 +1203,7 @@ with st.expander("Ver precisión histórica y comparación de modelos"):
             "xgboost_sin_externa": "XGBoost sin externa (US$ M)", "ultimo_trimestre": "Persistencia (US$ M)",
             "estacional_lag_4": "Referencia estacional (US$ M)",
         })
-        st.dataframe(multi_detail, use_container_width=True, hide_index=True)
+        st.dataframe(multi_detail, width="stretch", hide_index=True)
 
 with st.expander("¿Por qué variaron tanto los ingresos recientes? · Reportes de Buenaventura"):
     st.markdown(
@@ -1103,19 +1245,23 @@ with st.expander("Datos y fuentes"):
 
         **Variable externa elegida:** {selected_model_name}. Se selecciona entre XGBoost + índice ponderado y XGBoost + precio del oro según el menor MAE recursivo a cuatro trimestres. XGBoost sin variable externa y dos referencias sencillas se mantienen como controles.
 
-        **Índice ponderado:** precios trimestrales del Banco Mundial para oro, plata, cobre, plomo y zinc; cada metal se normaliza a 100 en 2019Q1. Las ponderaciones son una aproximación calculada con volumen × precio realizado FY2025; no son participación auditada de ingresos por metal.
+        **Índice ponderado:** precios trimestrales del Banco Mundial para oro, plata, cobre, plomo y zinc; cada metal se normaliza a 100 en 2019Q1. Las ponderaciones son una aproximación calculada con volumen × precio realizado FY2025; no son participación auditada de ingresos por metal y no deben interpretarse como mezcla oficial de ventas. Los insumos de los metales pueden tener distintos alcances operativos, por lo que este índice es un proxy analítico.
 
         **Ponderaciones usadas:**
         {weights_text}
 
-        **Fuentes:** [Portal de inversionistas de Buenaventura]({OFFICIAL_INVESTOR_URL}) · [Resultados FY2025/4T25]({FY2025_RESULTS_URL}) · [Resultados 1T26]({Q1_2026_RESULTS_URL}) · [Estados financieros 2T26]({Q2_2026_FINANCIALS_URL}) · [Banco Mundial — Commodity Markets / Pink Sheet]({WORLD_BANK_PAGE}).
+        **Trazabilidad de precios:** la aplicación consulta el XLSX mensual vigente desde la página del Banco Mundial y calcula medias trimestrales con los tres meses observados. El resultado de precios se mantiene en caché 12 horas; cuando la fuente externa se actualiza, puede cambiar el resultado. Para reproducir una corrida histórica exactamente, es necesario archivar también la versión del XLSX utilizada.
+
+        **Control adicional de la base:** [Libro de auditoría Excel: serie, control anual y diccionario](https://github.com/dlgeronimom-stack/buenaventura-sales-intelligence/blob/main/data/base_ventas_buenaventura_2019Q1_2026Q2.xlsx) · [Notas de trazabilidad](https://github.com/dlgeronimom-stack/buenaventura-sales-intelligence/blob/main/data/LEEME_base_ventas_buenaventura.md).
+
+        **Fuentes:** [Portal de inversionistas de Buenaventura]({OFFICIAL_INVESTOR_URL}) · [Resultados FY2025/4T25]({FY2025_RESULTS_URL}) · [Resultados 1T26]({Q1_2026_RESULTS_URL}) · [Resultados 2T26 (comunicado oficial SEC 6-K)]({Q2_2026_RESULTS_URL}) · [Estados financieros 2T26]({Q2_2026_FINANCIALS_URL}) · [Banco Mundial — Commodity Markets / Pink Sheet]({WORLD_BANK_PAGE}).
         """
     )
 
 st.markdown(
     f"""
     <div class="bvn-footer">
-      <strong>BUENAVENTURA · SALES INTELLIGENCE</strong><br>
+      <strong>BUENAVENTURA · INTELIGENCIA DE VENTAS</strong><br>
       Prototipo analítico independiente para aprendizaje y análisis. Se usa el logotipo público y una ilustración minera decorativa generada para el diseño; no es un producto oficial de Buenaventura.<br>
       Base histórica sin modificaciones · Último trimestre de ingresos: {last_sales_quarter} · Fuente de precios externos: Banco Mundial.
     </div>
